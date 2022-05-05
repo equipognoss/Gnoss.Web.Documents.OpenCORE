@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32421.90
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gnoss.Web.Documents", "Gnoss.Web.Documents\Gnoss.Web.Documents.csproj", "{5E12DCF7-4E2D-4F1D-A080-0AC104B2E27D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Es.Riam.Util", "..\Gnoss.Commons\Es.Riam.Util\Es.Riam.Util.csproj", "{775FD53C-9BF4-49EC-B902-44DE23BD0BBB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Es.Riam.Gnoss.Util", "..\Gnoss.Commons\Es.Riam.Gnoss.Util\Es.Riam.Gnoss.Util.csproj", "{F6BD445C-3565-40FF-88C7-35DB390147AB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Es.Riam.Gnoss.FileManager", "..\Gnoss.Commons\Es.Riam.Gnoss.FileManager\Es.Riam.Gnoss.FileManager.csproj", "{1F565BEB-5D1A-40A0-BA73-C5E90C2243C4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Es.Riam.Interfaces", "..\Gnoss.Commons\Es.Riam.Interfaces\Es.Riam.Interfaces.csproj", "{A5183BDD-E89F-4C73-99B1-058FCDF64C48}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5E12DCF7-4E2D-4F1D-A080-0AC104B2E27D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E12DCF7-4E2D-4F1D-A080-0AC104B2E27D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E12DCF7-4E2D-4F1D-A080-0AC104B2E27D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E12DCF7-4E2D-4F1D-A080-0AC104B2E27D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{775FD53C-9BF4-49EC-B902-44DE23BD0BBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{775FD53C-9BF4-49EC-B902-44DE23BD0BBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{775FD53C-9BF4-49EC-B902-44DE23BD0BBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{775FD53C-9BF4-49EC-B902-44DE23BD0BBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6BD445C-3565-40FF-88C7-35DB390147AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6BD445C-3565-40FF-88C7-35DB390147AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6BD445C-3565-40FF-88C7-35DB390147AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6BD445C-3565-40FF-88C7-35DB390147AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F565BEB-5D1A-40A0-BA73-C5E90C2243C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F565BEB-5D1A-40A0-BA73-C5E90C2243C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F565BEB-5D1A-40A0-BA73-C5E90C2243C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F565BEB-5D1A-40A0-BA73-C5E90C2243C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5183BDD-E89F-4C73-99B1-058FCDF64C48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5183BDD-E89F-4C73-99B1-058FCDF64C48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5183BDD-E89F-4C73-99B1-058FCDF64C48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5183BDD-E89F-4C73-99B1-058FCDF64C48}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {48EED2F8-68F2-4520-8496-11A8C226B4E2}
+	EndGlobalSection
+EndGlobal
