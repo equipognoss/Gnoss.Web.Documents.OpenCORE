@@ -86,6 +86,8 @@ namespace Gnoss.Web.Documents.Controllers
         [HttpPost, Route("SetFile")]
         public IActionResult SetFile(IFormFile FileBytes, string Name, string Extension, string Path)
         {
+            string route = "";
+
             try
             {
                 byte[] fileBytes = null;
@@ -107,13 +109,15 @@ namespace Gnoss.Web.Documents.Controllers
                     }
                 }
 
-                GestorArchivos.CrearDirectorioFisico(Path);
+                route = TransformarRuta(Path);
+
+                GestorArchivos.CrearDirectorioFisico(route);
                 //Crear el fichero en la ruta especificada
-                GestorArchivos.CrearFicheroFisico(Path, Name + Extension, fileBytes, mEncriptacionActiva);
+                GestorArchivos.CrearFicheroFisico(route, Name + Extension, fileBytes, mEncriptacionActiva);
             }
             catch (Exception ex)
             {
-                string mensajeExtra = $"Error al crear el fichero {Name} con extension {Extension} en la ruta {Path}";
+                string mensajeExtra = $"Error al crear el fichero {Name} con extension {Extension} en la ruta {route}";
                 _loggingService.GuardarLogError(ex, mensajeExtra);
                 return BadRequest("Error");
             }
@@ -335,6 +339,28 @@ namespace Gnoss.Web.Documents.Controllers
                 _loggingService.GuardarLogError(ex, mensajeExtra);
                 return Ok(0);
             }
+        }
+
+        /// <summary>
+        /// Divide la ruta recibida por parametro y la vuelve a unir de manera que la adapte al sistema 
+        /// operativo en el que se esta ejecutando el servicio. (Si hubiese peticiones entre un servidor Linux y otro
+        /// Windows, la ruta no será la misma)
+        /// </summary>
+        /// <param name="pPath">Ruta a transformar</param>
+        /// <returns>La ruta adaptada al sistema operativo en el que se esta ejecutando el servicio</returns>
+        private string TransformarRuta(string pPath)
+        {
+            string[] partesRuta = null;
+            if (pPath.Contains("\\"))
+            {         
+                partesRuta = pPath.Split("\\");
+            }
+            else
+            {
+                partesRuta = pPath.Split("/");
+            }
+
+            return Path.Combine(partesRuta);
         }
     }
 }
