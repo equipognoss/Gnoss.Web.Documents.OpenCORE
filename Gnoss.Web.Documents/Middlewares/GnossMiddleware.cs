@@ -9,7 +9,7 @@ using Gnoss.Web.Documents.Controllers;
 using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Gnoss.Web.Documents.Services;
+using Es.Riam.Gnoss.Util.Configuracion;
 
 namespace Gnoss.Web.Documents.Middlewares
 {

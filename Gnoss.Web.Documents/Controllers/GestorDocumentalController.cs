@@ -4,13 +4,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
-using Gnoss.Web.Documents.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Es.Riam.InterfacesOpenArchivos;
+using Es.Riam.Gnoss.Util.Configuracion;
 
 namespace Gnoss.Web.Documents.Controllers
 {
@@ -29,13 +30,16 @@ namespace Gnoss.Web.Documents.Controllers
 
         private ConfigService _configService;
 
+        private IUtilArchivos _utilArchivos;
+
         private static bool mEncriptacionActiva = true;
 
-        public GestorDocumentalController(LoggingService loggingService, ConfigService configService, IHostingEnvironment env)
+        public GestorDocumentalController(LoggingService loggingService, ConfigService configService, IHostingEnvironment env, IUtilArchivos utilArchivos)
         {
             _configService = configService;
             _loggingService = loggingService;
             _env = env;
+            _utilArchivos = utilArchivos;
         }
 
         private GestionArchivos GestorArchivos
@@ -62,27 +66,38 @@ namespace Gnoss.Web.Documents.Controllers
                         }
                     }
 
-                    mGestorArchivos = new GestionArchivos(_loggingService, mRutaFicheros, mAzureStorageConnectionString);
+                    mGestorArchivos = new GestionArchivos(_loggingService, _utilArchivos, mRutaFicheros, mAzureStorageConnectionString);
                 }
                 return mGestorArchivos;
             }
         }
 
         [HttpGet, Route("GetFile")]
-        public IActionResult GetFile(string Name, string Extension, string Path)
+        public void GetFile(string Name, string Extension, string Path)
         {
             try
             {
-                return Ok(GestorArchivos.DescargarFichero(Path, Name + Extension, mEncriptacionActiva).Result);
+                Response.StatusCode = 200;
+                Response.Headers["Content-Type"] = "application/octet-stream";
+                if (!string.IsNullOrEmpty(GestorArchivos.AzureStorageConnectionString))
+                {
+                    Byte[] bytes = GestorArchivos.DescargarFichero(Path, Name + Extension, mEncriptacionActiva).Result;
+                    Response.BodyWriter.WriteAsync(bytes);
+                }
+                else
+                {
+                    GestorArchivos.EscribirFicheroResponse(Response, Path, Name, Extension, mEncriptacionActiva);                  
+                } 
             }
             catch (Exception ex)
             {
                 string mensajeExtra = $"Error al obtener el fichero {Name} con extension {Extension} en la ruta {Path}";
                 _loggingService.GuardarLogError(ex, mensajeExtra);
-                return null;
+                //Response.StatusCode = 500;
             }
         }
 
+        [DisableRequestSizeLimit]
         [HttpPost, Route("SetFile")]
         public IActionResult SetFile(IFormFile FileBytes, string Name, string Extension, string Path)
         {
@@ -95,25 +110,41 @@ namespace Gnoss.Web.Documents.Controllers
                 if (HttpContext.Request.Query.TryGetValue("FileBytes", out value))
                 {
                     fileBytes = Convert.FromBase64String(value.ToString());
+                    route = TransformarRuta(Path);
+
+                    GestorArchivos.CrearDirectorioFisico(route);
+                    //Crear el fichero en la ruta especificada
+                    GestorArchivos.CrearFicheroFisico(route, Name + Extension, fileBytes, mEncriptacionActiva);
                 }
                 else
                 {
                     if (FileBytes.Length > 0)
                     {
-                        using (var ms = new MemoryStream())
+                        route = TransformarRuta(Path);
+
+                        GestorArchivos.CrearDirectorioFisico(route);
+                        if (string.IsNullOrEmpty(GestorArchivos.AzureStorageConnectionString))
                         {
-                            FileBytes.CopyTo(ms);
-                            fileBytes = ms.ToArray();
-                            // act on the Base64 data
+                            GestorArchivos.CrearFicheroFisicoDesdeStream(route, Name + Extension, FileBytes.OpenReadStream(), mEncriptacionActiva);
                         }
+                        else
+                        {
+                            GestorArchivos.CrearFicheroFisico(route, Name + Extension, fileBytes, mEncriptacionActiva);
+                        }
+                        //Crear el fichero en la ruta especificada
+                        //using (var ms = new MemoryStream())
+                        //{
+                        //FileBytes.s.CopyTo(ms);
+                        //fileBytes = ms.ToArray();
+                        // act on the Base64 data
+
+                        //}
                     }
+                    
+                    
                 }
 
-                route = TransformarRuta(Path);
-
-                GestorArchivos.CrearDirectorioFisico(route);
-                //Crear el fichero en la ruta especificada
-                GestorArchivos.CrearFicheroFisico(route, Name + Extension, fileBytes, mEncriptacionActiva);
+                
             }
             catch (Exception ex)
             {

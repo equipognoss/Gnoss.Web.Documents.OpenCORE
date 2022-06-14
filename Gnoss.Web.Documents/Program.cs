@@ -21,7 +21,11 @@ namespace Gnoss.Web.Documents
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 1000000000); // Maximo tamaño de subida ~ 1Gb
+                    webBuilder.ConfigureKestrel(options =>
+                    {
+                        options.Limits.MaxRequestBufferSize = 1000000000;
+                        options.Limits.MaxRequestBodySize = 1000000000;
+                    }) ; // Maximo tamaño de subida ~ 1Gb
                 });
     }
 }
