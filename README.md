@@ -23,4 +23,4 @@ documents:
 
 En esta configuración, existe un volumen que apunta a la ruta /app/Documentacion del contenedor. Ese volumen almacenará todos los documentos (Word, Pdf, Ppt, Excel, etc.) subidos a la plataforma. Se recomienda realizar copias de seguridad de la unidad en la que se mapee ese directorio.
 
-Se pueden consultar los posibles valores de configuración de cada parámetro aquí: https://github.com/equipognoss/Gnoss.Platform.Deploy
+Se pueden consultar los posibles valores de configuración de cada parámetro aquí: https://github.com/equipognoss/Gnoss.SemanticAIPlatform.OpenCORE
