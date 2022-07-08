@@ -24,3 +24,9 @@ documents:
 En esta configuración, existe un volumen que apunta a la ruta /app/Documentacion del contenedor. Ese volumen almacenará todos los documentos (Word, Pdf, Ppt, Excel, etc.) subidos a la plataforma. Se recomienda realizar copias de seguridad de la unidad en la que se mapee ese directorio.
 
 Se pueden consultar los posibles valores de configuración de cada parámetro aquí: https://github.com/equipognoss/Gnoss.SemanticAIPlatform.OpenCORE
+
+## Código de conducta
+Este proyecto a adoptado el código de conducta definido por "Contributor Covenant" para definir el comportamiento esperado en las contribuciones a este proyecto. Para más información ver https://www.contributor-covenant.org/
+
+## Licencia
+Este producto es parte de la plataforma [Gnoss Semantic AI Platform Open Core](https://github.com/equipognoss/Gnoss.SemanticAIPlatform.OpenCORE), es un producto open source y está licenciado bajo GPLv3.
