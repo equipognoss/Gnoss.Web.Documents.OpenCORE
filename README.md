@@ -2,7 +2,7 @@
 
 # Gnoss.Web.Documents.OpenCORE
 
-![](https://github.com/equipognoss/Gnoss.Web.Documents.OpenCORE/workflows/BuildWeb/badge.svg)
+![](https://github.com/equipognoss/Gnoss.Web.Documents.OpenCORE/workflows/BuildDocuments/badge.svg)
 
 Aplicación Web que se encarga de almacenar y servir los documentos que suben los usuarios a la plataforma, tales como archivos Word, PDF, hojas de cálculo, archivos comprimidos, etc. Esta aplicación NO debe ser accesible desde el exterior de la plataforma GNOSS, sólo debe estar disponible para que el resto de aplicaciones puedan hacer peticiones Web a ella.
 
