@@ -18,6 +18,9 @@ documents:
      AzureStorageConnectionString: ${AzureStorageConnectionString}
      LogLocation: ${LogLocation}
      ImplementationKey: ${ImplementationKey}
+     scopeIdentity: ${scopeIdentity}
+     clientIDIdentity: ${clientIDIdentity}
+     clientSecretIdentity: ${clientIDIdentity}
     volumes:
       - ./logs/documents:/app/logs
       - ./content/Documentacion:/app/Documentacion
