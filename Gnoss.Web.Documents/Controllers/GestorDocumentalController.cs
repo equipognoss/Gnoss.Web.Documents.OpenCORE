@@ -12,10 +12,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Es.Riam.InterfacesOpenArchivos;
 using Es.Riam.Gnoss.Util.Configuracion;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Gnoss.Web.Documents.Controllers
 {
     [Route("GestorDocumental")]
+    [Authorize]
     public class GestorDocumentalController : Controller
     {
         private static string mRutaFicheros;
