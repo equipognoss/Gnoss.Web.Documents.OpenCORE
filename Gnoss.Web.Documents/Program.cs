@@ -26,6 +26,7 @@ namespace Gnoss.Web.Documents
                         options.Limits.MaxRequestBufferSize = 1000000000;
                         options.Limits.MaxRequestBodySize = 1000000000;
                     }) ; // Maximo tamaño de subida ~ 1Gb
+                    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
                 });
     }
 }

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Es.Riam.Gnoss.Util.Configuracion;
+using Es.Riam.Gnoss.AD.EntityModel;
 
 namespace Gnoss.Web.Documents.Middlewares
 {
@@ -48,8 +49,9 @@ namespace Gnoss.Web.Documents.Middlewares
             LeerConfiguracionApplicationInsights(utilTelemetry);
         }
 
-        public async Task Invoke(HttpContext context, UtilTelemetry utilTelemetry, LoggingService error, IHostEnvironment env)
+        public async Task Invoke(HttpContext context, UtilTelemetry utilTelemetry, LoggingService error, IHostEnvironment env, EntityContext entityContext)
         {
+            entityContext.SetTrackingFalse();
             Application_Start(utilTelemetry, env);
             await _next(context);
         }
