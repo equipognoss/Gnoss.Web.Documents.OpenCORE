@@ -27,6 +27,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Swashbuckle.AspNetCore.Filters;
 using System.IO;
 using System.Reflection;
+using Es.Riam.Gnoss.CL.RelatedVirtuoso;
 
 namespace Gnoss.Web.Documents
 {
@@ -56,7 +57,7 @@ namespace Gnoss.Web.Documents
             services.AddScoped(typeof(UtilServicios));
             services.AddScoped<IUtilArchivos, UtilArchivosOpen>();
             services.AddScoped<IServicesUtilVirtuosoAndReplication, ServicesVirtuosoAndBidirectionalReplicationOpen>();
-
+            services.AddScoped(typeof(RelatedVirtuosoCL));
             string bdType = "";
             IDictionary environmentVariables = Environment.GetEnvironmentVariables();
             if (environmentVariables.Contains("connectionType"))
