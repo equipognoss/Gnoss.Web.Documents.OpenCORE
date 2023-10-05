@@ -1,4 +1,8 @@
-﻿using Es.Riam.Gnoss.FileManager;
+﻿using Es.Riam.AbstractsOpen;
+using Es.Riam.Gnoss.AD.EntityModel;
+using Es.Riam.Gnoss.CL;
+using Es.Riam.Gnoss.CL.Trazas;
+using Es.Riam.Gnoss.FileManager;
 using Es.Riam.Gnoss.Util.General;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -13,6 +17,7 @@ using System.Threading.Tasks;
 using Es.Riam.InterfacesOpenArchivos;
 using Es.Riam.Gnoss.Util.Configuracion;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Gnoss.Web.Documents.Controllers
 {
@@ -21,20 +26,20 @@ namespace Gnoss.Web.Documents.Controllers
     public class GestorDocumentalController : Controller
     {
         private static string mRutaFicheros;
-
         private static string mAzureStorageConnectionString;
-
+        private EntityContext mEntityContext;
+        private RedisCacheWrapper mRedisCacheWrapper;
+        private IServicesUtilVirtuosoAndReplication mServicesUtilVirtuosoAndReplication;
+        private LoggingService mLoggingService;
+        private ConfigService mConfigService;
         private GestionArchivos mGestorArchivos = null;
-
         private IHostingEnvironment _env;
-
         private LoggingService _loggingService;
-
         private ConfigService _configService;
-
         private IUtilArchivos _utilArchivos;
-
         private static bool mEncriptacionActiva = true;
+        private static object BLOQUEO_COMPROBACION_TRAZA = new object();
+        private static DateTime HORA_COMPROBACION_TRAZA;
 
         public GestorDocumentalController(LoggingService loggingService, ConfigService configService, IHostingEnvironment env, IUtilArchivos utilArchivos)
         {
@@ -51,13 +56,15 @@ namespace Gnoss.Web.Documents.Controllers
                 if (mGestorArchivos == null)
                 {
                     string rutaConfigs = Path.Combine(_env.ContentRootPath, "config");
-                    //string rutaConfigs = HttpContext.Current.Server.MapPath("/config");
                     mAzureStorageConnectionString = _configService.GetAzureStorageConnectionString();
                     if (string.IsNullOrEmpty(mAzureStorageConnectionString))
                     {
                         mAzureStorageConnectionString = "";
-                        mRutaFicheros = Path.Combine(_env.ContentRootPath, "Documentacion");
-                        //mRutaFicheros = HttpContext.Current.Server.MapPath("Documentacion");
+                        mRutaFicheros = _configService.GetRutaDocumentacion();
+                        if (string.IsNullOrEmpty(mRutaFicheros))
+                        {
+                            mRutaFicheros = Path.Combine(_env.ContentRootPath, "Documentacion");
+                        }
                     }
                     if (System.IO.File.Exists(Path.Combine(rutaConfigs, "encript-disabled.config")))
                     {
@@ -83,7 +90,7 @@ namespace Gnoss.Web.Documents.Controllers
                 Response.Headers["Content-Type"] = "application/octet-stream";
                 if (!string.IsNullOrEmpty(GestorArchivos.AzureStorageConnectionString))
                 {
-                    Byte[] bytes = GestorArchivos.DescargarFichero(Path, Name + Extension, mEncriptacionActiva).Result;
+                    byte[] bytes = GestorArchivos.DescargarFichero(Path, Name + Extension, mEncriptacionActiva).Result;
                     Response.BodyWriter.WriteAsync(bytes);
                 }
                 else
@@ -372,6 +379,43 @@ namespace Gnoss.Web.Documents.Controllers
                 _loggingService.GuardarLogError(ex, mensajeExtra);
                 return Ok(0);
             }
+        }
+
+        #region Métodos de trazas
+        [NonAction]
+        private void IniciarTraza()
+        {
+            if (DateTime.Now > HORA_COMPROBACION_TRAZA)
+            {
+                lock (BLOQUEO_COMPROBACION_TRAZA)
+                {
+                    if (DateTime.Now > HORA_COMPROBACION_TRAZA)
+                    {
+                        HORA_COMPROBACION_TRAZA = DateTime.Now.AddSeconds(15);
+                        TrazasCL trazasCL = new TrazasCL(mEntityContext, mLoggingService, mRedisCacheWrapper, mConfigService, mServicesUtilVirtuosoAndReplication);
+                        string tiempoTrazaResultados = trazasCL.ObtenerTrazaEnCache("documents");
+
+                        if (!string.IsNullOrEmpty(tiempoTrazaResultados))
+                        {
+                            int valor = 0;
+                            int.TryParse(tiempoTrazaResultados, out valor);
+                            LoggingService.TrazaHabilitada = true;
+                            LoggingService.TiempoMinPeticion = valor; //Para sacar los segundos
+                        }
+                        else
+                        {
+                            LoggingService.TrazaHabilitada = false;
+                            LoggingService.TiempoMinPeticion = 0;
+                        }
+                    }
+                }
+            }
+        }
+        #endregion
+
+        public override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            IniciarTraza();
         }
 
         /// <summary>
