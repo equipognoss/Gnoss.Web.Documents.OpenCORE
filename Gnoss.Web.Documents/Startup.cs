@@ -28,6 +28,7 @@ using Swashbuckle.AspNetCore.Filters;
 using System.IO;
 using System.Reflection;
 using Es.Riam.Gnoss.CL.RelatedVirtuoso;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Gnoss.Web.Documents
 {
@@ -43,8 +44,29 @@ namespace Gnoss.Web.Documents
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+			ILoggerFactory loggerFactory =
+		   LoggerFactory.Create(builder =>
+		   {
+			   builder.AddConfiguration(Configuration.GetSection("Logging"));
+			   builder.AddSimpleConsole(options =>
+			   {
+				   options.IncludeScopes = true;
+				   options.SingleLine = true;
+				   options.TimestampFormat = "yyyy-MM-dd HH:mm:ss ";
+				   options.UseUtcTimestamp = true;
+			   });
+		   });
+
+			services.AddSingleton(loggerFactory);
+			services.AddControllers();
+			services.Configure<FormOptions>(x =>
+			{
+				x.ValueLengthLimit = 524288000;
+				x.MultipartBodyLengthLimit = 524288000; // In case of multipart
+			});
             services.AddControllers();
-            services.AddScoped(typeof(UtilTelemetry));
+            services.AddHttpContextAccessor();
+			services.AddScoped(typeof(UtilTelemetry));
             services.AddScoped(typeof(Usuario));
             services.AddScoped(typeof(UtilPeticion));
             services.AddScoped(typeof(Conexion));
@@ -68,13 +90,12 @@ namespace Gnoss.Web.Documents
             {
                 bdType = Configuration.GetConnectionString("connectionType");
             }
-            if (bdType.Equals("2"))
+            if (bdType.Equals("2") || bdType.Equals("1"))
             {
                 services.AddScoped(typeof(DbContextOptions<EntityContext>));
                 services.AddScoped(typeof(DbContextOptions<EntityContextBASE>));
             }
             services.AddSingleton(typeof(ConfigService));
-            services.AddSingleton<ILoggerFactory, LoggerFactory>();
             services.AddMvc();
             string acid = "";
             if (environmentVariables.Contains("acid"))
@@ -111,12 +132,7 @@ namespace Gnoss.Web.Documents
                 );
                 services.AddDbContext<EntityContextBASE, EntityContextBASEOracle>(options =>
                 options.UseOracle(baseConnection)
-
-
                 );
-                //services.AddDbContext<EntityContextOauth, EntityContextOauthOracle>(options =>
-                // options.UseOracle(oauthConnection)
-                // );
             }
             else if (bdType.Equals("2"))
             {
