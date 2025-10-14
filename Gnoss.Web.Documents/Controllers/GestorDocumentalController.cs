@@ -1,23 +1,27 @@
 ﻿using Es.Riam.AbstractsOpen;
 using Es.Riam.Gnoss.AD.EntityModel;
 using Es.Riam.Gnoss.CL;
+using Es.Riam.Gnoss.CL.ServiciosGenerales;
 using Es.Riam.Gnoss.CL.Trazas;
 using Es.Riam.Gnoss.FileManager;
+using Es.Riam.Gnoss.Util.Configuracion;
 using Es.Riam.Gnoss.Util.General;
+using Es.Riam.InterfacesOpenArchivos;
+using Es.Riam.Util;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Es.Riam.InterfacesOpenArchivos;
-using Es.Riam.Gnoss.Util.Configuracion;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Gnoss.Web.Documents.Controllers
 {
@@ -40,13 +44,16 @@ namespace Gnoss.Web.Documents.Controllers
         private static bool mEncriptacionActiva = true;
         private static object BLOQUEO_COMPROBACION_TRAZA = new object();
         private static DateTime HORA_COMPROBACION_TRAZA;
-
-        public GestorDocumentalController(LoggingService loggingService, ConfigService configService, IHostingEnvironment env, IUtilArchivos utilArchivos)
+        private ILogger mlogger;
+        private ILoggerFactory mLoggerFactory;
+        public GestorDocumentalController(LoggingService loggingService, ConfigService configService, IHostingEnvironment env, IUtilArchivos utilArchivos, ILogger<GestorDocumentalController> logger, ILoggerFactory loggerFactory)
         {
             _configService = configService;
             _loggingService = loggingService;
             _env = env;
             _utilArchivos = utilArchivos;
+            mlogger = logger;
+            mLoggerFactory = loggerFactory;
         }
 
         private GestionArchivos GestorArchivos
@@ -75,7 +82,7 @@ namespace Gnoss.Web.Documents.Controllers
                         }
                     }
 
-                    mGestorArchivos = new GestionArchivos(_loggingService, _utilArchivos, mRutaFicheros, mAzureStorageConnectionString);
+                    mGestorArchivos = new GestionArchivos(_loggingService, _utilArchivos, mLoggerFactory.CreateLogger<GestionArchivos>(), mLoggerFactory, mRutaFicheros, mAzureStorageConnectionString);
                 }
                 return mGestorArchivos;
             }
@@ -95,13 +102,13 @@ namespace Gnoss.Web.Documents.Controllers
                 }
                 else
                 {
-                    GestorArchivos.EscribirFicheroResponse(Response, Path, Name, Extension, mEncriptacionActiva);                  
-                } 
+                    GestorArchivos.EscribirFicheroResponse(Response, Path, Name, Extension, mEncriptacionActiva);
+                }
             }
             catch (Exception ex)
             {
                 string mensajeExtra = $"Error al obtener el fichero {Name} con extension {Extension} en la ruta {Path}";
-                _loggingService.GuardarLogError(ex, mensajeExtra);
+                _loggingService.GuardarLogError(ex, mensajeExtra, mlogger);
                 //Response.StatusCode = 500;
             }
         }
@@ -149,16 +156,16 @@ namespace Gnoss.Web.Documents.Controllers
 
                         //}
                     }
-                    
-                    
+
+
                 }
 
-                
+
             }
             catch (Exception ex)
             {
                 string mensajeExtra = $"Error al crear el fichero {Name} con extension {Extension} en la ruta {route}";
-                _loggingService.GuardarLogError(ex, mensajeExtra);
+                _loggingService.GuardarLogError(ex, mensajeExtra, mlogger);
                 return BadRequest("Error");
             }
             return Ok("");
@@ -174,7 +181,7 @@ namespace Gnoss.Web.Documents.Controllers
             catch (Exception ex)
             {
                 string mensajeExtra = $"Error al borrar el fichero {Name} con extension {Extension} en la ruta {Path}";
-                _loggingService.GuardarLogError(ex, mensajeExtra);
+                _loggingService.GuardarLogError(ex, mensajeExtra, mlogger);
                 return Ok(false);
             }
             return Ok(true);
@@ -194,7 +201,7 @@ namespace Gnoss.Web.Documents.Controllers
             catch (Exception ex)
             {
                 string mensajeExtra = $"Error al borrar los ficheros de la ruta {Path}";
-                _loggingService.GuardarLogError(ex, mensajeExtra);
+                _loggingService.GuardarLogError(ex, mensajeExtra, mlogger);
             }
             return Ok(false);
         }
@@ -213,7 +220,7 @@ namespace Gnoss.Web.Documents.Controllers
             catch (Exception ex)
             {
                 string mensajeExtra = $"Error al borrar los ficheros de la ontología {Ontology}";
-                _loggingService.GuardarLogError(ex, mensajeExtra);
+                _loggingService.GuardarLogError(ex, mensajeExtra, mlogger);
             }
             return Ok(false);
         }
@@ -230,14 +237,14 @@ namespace Gnoss.Web.Documents.Controllers
                         GestorArchivos.CrearDirectorioFisico(PathDestination);
                     }
 
-                    GestorArchivos.CopiarArchivo(PathOrigin, PathDestination, Name + Extension, true, NameDestination);
+                    GestorArchivos.CopiarArchivo(PathOrigin, PathDestination, Name, true, Extension, NameDestination);
 
                     return Ok(true);
                 }
                 catch (Exception ex)
                 {
                     string mensajeExtra = $"Error al copiar el fichero {Name} con extension {Extension} desde la ruta {PathOrigin} a la ruta {PathDestination}";
-                    _loggingService.GuardarLogError(ex, mensajeExtra);
+                    _loggingService.GuardarLogError(ex, mensajeExtra, mlogger);
                     return Ok(false);
                 }
             }
@@ -263,7 +270,7 @@ namespace Gnoss.Web.Documents.Controllers
                 catch (Exception ex)
                 {
                     string mensajeExtra = $"Error al mover el fichero {Name} con extension {Extension} desde la ruta {PathOrigin} a la ruta {PathDestination}";
-                    _loggingService.GuardarLogError(ex, mensajeExtra);
+                    _loggingService.GuardarLogError(ex, mensajeExtra, mlogger);
                     return Ok(false);
                 }
             }
@@ -306,7 +313,7 @@ namespace Gnoss.Web.Documents.Controllers
             catch (Exception ex)
             {
                 string mensajeExtra = $"Error al copiar los ficheros desde la ruta {PathOrigin} a la ruta {PathDestination}";
-                _loggingService.GuardarLogError(ex, mensajeExtra);
+                _loggingService.GuardarLogError(ex, mensajeExtra, mlogger);
                 return Ok(false);
             }
         }
@@ -376,7 +383,7 @@ namespace Gnoss.Web.Documents.Controllers
             catch (Exception ex)
             {
                 string mensajeExtra = $"Error al obtener el tamaño del fichero {Name} con extension {Extension} en la ruta {Path}";
-                _loggingService.GuardarLogError(ex, mensajeExtra);
+                _loggingService.GuardarLogError(ex, mensajeExtra, mlogger);
                 return Ok(0);
             }
         }
@@ -392,7 +399,7 @@ namespace Gnoss.Web.Documents.Controllers
                     if (DateTime.Now > HORA_COMPROBACION_TRAZA)
                     {
                         HORA_COMPROBACION_TRAZA = DateTime.Now.AddSeconds(15);
-                        TrazasCL trazasCL = new TrazasCL(mEntityContext, mLoggingService, mRedisCacheWrapper, mConfigService, mServicesUtilVirtuosoAndReplication);
+                        TrazasCL trazasCL = new TrazasCL(mEntityContext, mLoggingService, mRedisCacheWrapper, mConfigService, mServicesUtilVirtuosoAndReplication, mLoggerFactory.CreateLogger<TrazasCL>(), mLoggerFactory);
                         string tiempoTrazaResultados = trazasCL.ObtenerTrazaEnCache("documents");
 
                         if (!string.IsNullOrEmpty(tiempoTrazaResultados))
@@ -429,7 +436,7 @@ namespace Gnoss.Web.Documents.Controllers
         {
             string[] partesRuta = null;
             if (pPath.Contains("\\"))
-            {         
+            {
                 partesRuta = pPath.Split("\\");
             }
             else

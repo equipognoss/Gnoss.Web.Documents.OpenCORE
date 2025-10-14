@@ -1,34 +1,36 @@
+using Es.Riam.AbstractsOpen;
+using Es.Riam.Gnoss.AD.EntityModel;
+using Es.Riam.Gnoss.AD.EntityModelBASE;
+using Es.Riam.Gnoss.AD.Virtuoso;
+using Es.Riam.Gnoss.CL;
+using Es.Riam.Gnoss.CL.RelatedVirtuoso;
+using Es.Riam.Gnoss.Util.Configuracion;
 using Es.Riam.Gnoss.Util.General;
 using Es.Riam.Gnoss.Util.Seguridad;
+using Es.Riam.Gnoss.UtilServiciosWeb;
+using Es.Riam.Interfaces.InterfacesOpen;
+using Es.Riam.InterfacesOpenArchivos;
+using Es.Riam.Open;
+using Es.Riam.OpenArchivos;
+using Es.Riam.OpenReplication;
 using Es.Riam.Util;
+using Gnoss.Web.Documents.Middlewares;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
-using Gnoss.Web.Documents.Middlewares;
-using Es.Riam.Gnoss.Util.Configuracion;
-using Es.Riam.Gnoss.CL;
-using Es.Riam.Gnoss.UtilServiciosWeb;
-using Es.Riam.Gnoss.AD.Virtuoso;
-using Es.Riam.InterfacesOpenArchivos;
-using Es.Riam.AbstractsOpen;
-using Es.Riam.OpenReplication;
-using Es.Riam.OpenArchivos;
-using System.Collections;
-using System;
-using Microsoft.EntityFrameworkCore;
-using Es.Riam.Gnoss.AD.EntityModel;
-using Es.Riam.Gnoss.AD.EntityModelBASE;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Swashbuckle.AspNetCore.Filters;
+using System;
+using System.Collections;
 using System.IO;
 using System.Reflection;
-using Es.Riam.Gnoss.CL.RelatedVirtuoso;
-using Microsoft.AspNetCore.Http.Features;
 
 namespace Gnoss.Web.Documents
 {
@@ -80,6 +82,7 @@ namespace Gnoss.Web.Documents
             services.AddScoped<IUtilArchivos, UtilArchivosOpen>();
             services.AddScoped<IServicesUtilVirtuosoAndReplication, ServicesVirtuosoAndBidirectionalReplicationOpen>();
             services.AddScoped(typeof(RelatedVirtuosoCL));
+            services.AddScoped<IAvailableServices, AvailableServicesOpen>();
             string bdType = "";
             IDictionary environmentVariables = Environment.GetEnvironmentVariables();
             if (environmentVariables.Contains("connectionType"))
@@ -118,10 +121,10 @@ namespace Gnoss.Web.Documents
             if (bdType.Equals("0"))
             {
                 services.AddDbContext<EntityContext>(options =>
-                        options.UseSqlServer(acid)
+                        options.UseSqlServer(acid, o => o.UseCompatibilityLevel(110))
                         );
                 services.AddDbContext<EntityContextBASE>(options =>
-                        options.UseSqlServer(baseConnection)
+                        options.UseSqlServer(baseConnection, o => o.UseCompatibilityLevel(110))
 
                         );
             }
