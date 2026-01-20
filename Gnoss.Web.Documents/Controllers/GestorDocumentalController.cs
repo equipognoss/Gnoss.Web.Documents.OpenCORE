@@ -318,6 +318,42 @@ namespace Gnoss.Web.Documents.Controllers
             }
         }
 
+        /// <summary>
+        /// Copy the specified element from the origin directory to the destination directory
+        /// </summary>
+        /// <param name="PathOrigin">Origin directory where the file is located</param>
+        /// <param name="PathDestination">Destination directory where the file will be copied</param>
+        /// <param name="ElementName">Name of the file to be copied</param>
+        /// <returns> True if the file was copied successfully, false otherwise</returns>
+        [HttpPost, Route("CopyElementoToDirectory")]
+        public IActionResult CopyDocsDirectory(string PathOrigin, string PathDestination, string ElementName)
+        {
+            try
+            {
+                string rutaFicheroOrigen = PathOrigin;
+
+                if (GestorArchivos.ComprobarExisteDirectorio(rutaFicheroOrigen).Result)
+                {
+                    string rutaFicheroDestino = PathDestination;
+
+                    bool exists = GestorArchivos.ComprobarExisteDirectorio(rutaFicheroDestino).Result;
+                    if (!exists)
+                    {
+                        GestorArchivos.CrearDirectorioFisico(rutaFicheroDestino);
+                    }
+
+                    GestorArchivos.CopiarArchivo(rutaFicheroOrigen, rutaFicheroDestino, ElementName, true);
+                }
+
+                return Ok(true);
+            }
+            catch (Exception ex)
+            {
+                string mensajeExtra = $"Error al copiar los ficheros desde la ruta {PathOrigin} a la ruta {PathDestination}";
+                _loggingService.GuardarLogError(ex, mensajeExtra, mlogger);
+                return Ok(false);
+            }
+        }
 
         [HttpGet, Route("GetFilesName")]
         public IActionResult GetFilesName(string Path)
