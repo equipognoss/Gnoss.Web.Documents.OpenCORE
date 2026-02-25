@@ -9,13 +9,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl
 
 WORKDIR /app
 
-COPY Gnoss.Web.Documents/*.csproj ./
-
-RUN dotnet restore
-
 COPY . ./
 
-RUN dotnet publish Gnoss.Web.Documents/Gnoss.Web.Documents.csproj -c Release -o out
+RUN dotnet restore Gnoss.Web.Documents.OpenCORE/Gnoss.Web.Documents/Gnoss.Web.Documents.csproj
+
+RUN dotnet publish Gnoss.Web.Documents.OpenCORE/Gnoss.Web.Documents/Gnoss.Web.Documents.csproj -c Release -o out
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
