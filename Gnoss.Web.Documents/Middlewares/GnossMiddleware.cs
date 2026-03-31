@@ -35,12 +35,6 @@ namespace Gnoss.Web.Documents.Middlewares
             //RouteConfig.RegisterRoutes(RouteTable.Routes);
             //BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            string nodoRutaLogstash = _configService.GetLogstashEndpoint();
-            if (!string.IsNullOrEmpty(nodoRutaLogstash))
-            {
-                LoggingService.InicializarLogstash(nodoRutaLogstash);
-            }
-
             //Establezco la ruta del fichero de error por defecto
             //Util.General.Error.RUTA_FICHERO_ERROR = this.Server.MapPath("~/logs") + "\\" + "error" + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".log";        
             LoggingService.RUTA_DIRECTORIO_ERROR = Path.Combine(env.ContentRootPath, "logs");

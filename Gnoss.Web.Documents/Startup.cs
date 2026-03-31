@@ -46,21 +46,9 @@ namespace Gnoss.Web.Documents
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-			ILoggerFactory loggerFactory =
-		   LoggerFactory.Create(builder =>
-		   {
-			   builder.AddConfiguration(Configuration.GetSection("Logging"));
-			   builder.AddSimpleConsole(options =>
-			   {
-				   options.IncludeScopes = true;
-				   options.SingleLine = true;
-				   options.TimestampFormat = "yyyy-MM-dd HH:mm:ss ";
-				   options.UseUtcTimestamp = true;
-			   });
-		   });
+            LoggingService.ConfigurarLogging(services, Configuration);
 
-			services.AddSingleton(loggerFactory);
-			services.AddControllers();
+            services.AddControllers();
 			services.Configure<FormOptions>(x =>
 			{
 				x.ValueLengthLimit = 524288000;

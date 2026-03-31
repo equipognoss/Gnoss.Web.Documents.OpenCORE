@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Net;
@@ -33,7 +34,7 @@ namespace Gnoss.Web.Documents.Middlewares
         protected Task HandleExceptionAsync(LoggingService error, HttpContext context, Exception ex)
         {
             // Code that runs when an unhandled error occurs
-            error.GuardarLogError(ex);
+            error.GuardarLogError(ex, error.CrearLogger<ApplicationErrorMiddleware>());
 
             var code = HttpStatusCode.InternalServerError;
 
