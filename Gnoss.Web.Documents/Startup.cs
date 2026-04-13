@@ -46,8 +46,6 @@ namespace Gnoss.Web.Documents
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            LoggingService.ConfigurarLogging(services, Configuration);
-
             services.AddControllers();
 			services.Configure<FormOptions>(x =>
 			{

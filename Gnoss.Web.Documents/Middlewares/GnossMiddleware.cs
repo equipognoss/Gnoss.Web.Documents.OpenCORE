@@ -63,17 +63,6 @@ namespace Gnoss.Web.Documents.Middlewares
                 TelemetryConfiguration.Active.InstrumentationKey = implementationKey;
                 utilTelemetry.Telemetry.InstrumentationKey = implementationKey;
             }
-
-            string logsLocation = _configService.GetLogLocation();
-
-            int valorInt;
-            if (int.TryParse(logsLocation, out valorInt))
-            {
-                if (Enum.IsDefined(typeof(UtilTelemetry.UbicacionLogsYTrazas), valorInt))
-                {
-                    LoggingService.UBICACIONLOGS = (UtilTelemetry.UbicacionLogsYTrazas)valorInt;
-                }
-            }
         }
     }
 
