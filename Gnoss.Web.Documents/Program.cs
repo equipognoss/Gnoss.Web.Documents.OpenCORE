@@ -42,16 +42,22 @@ namespace Gnoss.Web.Documents
                 .ConfigureServices((context, services) =>
                 {
                     LoggingService.SuscribirCambios(context, _startupLogger);
-                    _startupLogger.Information("Suscripción a cambios de configuración registrada");
+                    _startupLogger.Information("Suscripciï¿½n a cambios de configuraciï¿½n registrada");
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.ConfigureKestrel(options =>
+                    webBuilder.ConfigureKestrel((context, options) =>
                     {
                         options.Limits.MaxRequestBufferSize = 1000000000;
                         options.Limits.MaxRequestBodySize = 1000000000;
-                    }) ; // Maximo tamaño de subida ~ 1Gb
+#if !DEBUG
+                        var apiPort = context.Configuration.GetValue("ApiPort", 8080);
+                        var managementPort = context.Configuration.GetValue("ManagementPort", 8081);
+                        options.ListenAnyIP(apiPort);
+                        options.ListenAnyIP(managementPort);
+#endif
+                    }); // Maximo tamaï¿½o de subida ~ 1Gb
                     AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
                 });
     }

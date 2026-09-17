@@ -1,11 +1,9 @@
 ﻿using Es.Riam.Gnoss.Util.General;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using System;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Gnoss.Web.Documents.Middlewares
@@ -49,10 +47,10 @@ namespace Gnoss.Web.Documents.Middlewares
             //    Log.Information($"{ex.Message}\n");
             //}
 
-            var result = JsonConvert.SerializeObject(new { error = "Internal server error" });
+            var result = JsonSerializer.Serialize(new { error = "Internal server error" });
             if (code != HttpStatusCode.InternalServerError)
             {
-                result = JsonConvert.SerializeObject(new { error = ex.Message });
+                result = JsonSerializer.Serialize(new { error = ex.Message });
             }
 
             context.Response.ContentType = "application/json";

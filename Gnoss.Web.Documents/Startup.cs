@@ -1,9 +1,9 @@
 using Es.Riam.AbstractsOpen;
 using Es.Riam.Gnoss.AD.EntityModel;
 using Es.Riam.Gnoss.AD.EntityModelBASE;
-using Es.Riam.Gnoss.AD.Virtuoso;
 using Es.Riam.Gnoss.CL;
 using Es.Riam.Gnoss.CL.RelatedVirtuoso;
+using Es.Riam.Gnoss.HealthChecks;
 using Es.Riam.Gnoss.Util.Configuracion;
 using Es.Riam.Gnoss.Util.General;
 using Es.Riam.Gnoss.Util.Seguridad;
@@ -23,9 +23,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections;
@@ -54,19 +52,16 @@ namespace Gnoss.Web.Documents
 			});
             services.AddControllers();
             services.AddHttpContextAccessor();
-			services.AddScoped(typeof(UtilTelemetry));
             services.AddScoped(typeof(Usuario));
             services.AddScoped(typeof(UtilPeticion));
             services.AddScoped(typeof(Conexion));
             services.AddScoped(typeof(UtilGeneral));
             services.AddScoped(typeof(LoggingService));
-            services.AddScoped(typeof(RedisCacheWrapper));
+            services.AddSingleton(typeof(RedisCacheWrapper));
             services.AddScoped(typeof(Configuracion));
             services.AddScoped(typeof(GnossCache));
-            services.AddScoped(typeof(VirtuosoAD));
             services.AddScoped(typeof(UtilServicios));
             services.AddScoped<IUtilArchivos, UtilArchivosOpen>();
-            services.AddScoped<IServicesUtilVirtuosoAndReplication, ServicesVirtuosoAndBidirectionalReplicationOpen>();
             services.AddScoped(typeof(RelatedVirtuosoCL));
             services.AddScoped<IAvailableServices, AvailableServicesOpen>();
             string bdType = "";
@@ -128,6 +123,12 @@ namespace Gnoss.Web.Documents
 
             services.AddAuthorization();
 
+            var hcConfigService = services.BuildServiceProvider().GetService<ConfigService>();
+            services.AddHealthChecks()
+                .AddGnossDatabaseHealthCheck<EntityContext>(bdType, hcConfigService.ObtenerSqlConnectionString())
+                .AddGnossRedisHealthCheck(hcConfigService.ObtenerConexionRedisIPMaster("redis"))
+                .AddGnossVirtuosoHealthCheck(hcConfigService.ObtenerVirtuosoConnectionString().ConnectionString);
+
             services.AddSwaggerGen(options =>
             {
                 options.EnableAnnotations();
@@ -159,8 +160,6 @@ namespace Gnoss.Web.Documents
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gnoss.Web.Documents v1"));
             }
-
-			app.UseAuthentication();
 			
             app.UseHttpsRedirection();
 
@@ -170,10 +169,13 @@ namespace Gnoss.Web.Documents
 
             app.UseApplicationErrorMiddleware();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
+            var managementPort = Configuration.GetValue("ManagementPort", 8081);
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapGnossHealthEndpoints(managementPort);
                 endpoints.MapControllers();
             });
         }

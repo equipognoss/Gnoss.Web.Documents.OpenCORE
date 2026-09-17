@@ -33,11 +33,10 @@ namespace Gnoss.Web.Documents.Controllers
         private static string mAzureStorageConnectionString;
         private EntityContext mEntityContext;
         private RedisCacheWrapper mRedisCacheWrapper;
-        private IServicesUtilVirtuosoAndReplication mServicesUtilVirtuosoAndReplication;
         private LoggingService mLoggingService;
         private ConfigService mConfigService;
         private GestionArchivos mGestorArchivos = null;
-        private IHostingEnvironment _env;
+        private IWebHostEnvironment _env;
         private LoggingService _loggingService;
         private ConfigService _configService;
         private IUtilArchivos _utilArchivos;
@@ -46,7 +45,7 @@ namespace Gnoss.Web.Documents.Controllers
         private static DateTime HORA_COMPROBACION_TRAZA;
         private ILogger mlogger;
         private ILoggerFactory mLoggerFactory;
-        public GestorDocumentalController(LoggingService loggingService, ConfigService configService, IHostingEnvironment env, IUtilArchivos utilArchivos, ILogger<GestorDocumentalController> logger, ILoggerFactory loggerFactory)
+        public GestorDocumentalController(LoggingService loggingService, ConfigService configService, IWebHostEnvironment env, IUtilArchivos utilArchivos, ILogger<GestorDocumentalController> logger, ILoggerFactory loggerFactory)
         {
             _configService = configService;
             _loggingService = loggingService;
@@ -435,7 +434,7 @@ namespace Gnoss.Web.Documents.Controllers
                     if (DateTime.Now > HORA_COMPROBACION_TRAZA)
                     {
                         HORA_COMPROBACION_TRAZA = DateTime.Now.AddSeconds(15);
-                        TrazasCL trazasCL = new TrazasCL(mEntityContext, mLoggingService, mRedisCacheWrapper, mConfigService, mServicesUtilVirtuosoAndReplication, mLoggerFactory.CreateLogger<TrazasCL>(), mLoggerFactory);
+                        TrazasCL trazasCL = new TrazasCL(mEntityContext, mLoggingService, mRedisCacheWrapper, mConfigService, null, mLoggerFactory.CreateLogger<TrazasCL>(), mLoggerFactory);
                         string tiempoTrazaResultados = trazasCL.ObtenerTrazaEnCache("documents");
 
                         if (!string.IsNullOrEmpty(tiempoTrazaResultados))

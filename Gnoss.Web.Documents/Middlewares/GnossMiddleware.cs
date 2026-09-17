@@ -1,11 +1,6 @@
-﻿using Es.Riam.Util;
-using System;
-using System.Xml;
-using Es.Riam.Gnoss.Util.General;
+﻿using Es.Riam.Gnoss.Util.General;
 using System.IO;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.ApplicationInsights.Extensibility;
-using Gnoss.Web.Documents.Controllers;
 using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -27,7 +22,7 @@ namespace Gnoss.Web.Documents.Middlewares
             _next = next;
         }
 
-        protected void Application_Start(UtilTelemetry utilTelemetry, IHostEnvironment env)
+        protected void Application_Start(IHostEnvironment env)
         {
             //AreaRegistration.RegisterAllAreas();
             //GlobalConfiguration.Configure(WebApiConfig.Register);
@@ -39,30 +34,13 @@ namespace Gnoss.Web.Documents.Middlewares
             //Util.General.Error.RUTA_FICHERO_ERROR = this.Server.MapPath("~/logs") + "\\" + "error" + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".log";        
             LoggingService.RUTA_DIRECTORIO_ERROR = Path.Combine(env.ContentRootPath, "logs");
             //Util.General.Error.RUTA_FICHERO_CONSULTA_COSTOSA = this.Server.MapPath("~/logs") + "\\" + "consulta_costosa" + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".log";
-
-            LeerConfiguracionApplicationInsights(utilTelemetry);
         }
 
-        public async Task Invoke(HttpContext context, UtilTelemetry utilTelemetry, LoggingService error, IHostEnvironment env, EntityContext entityContext)
+        public async Task Invoke(HttpContext context, LoggingService error, IHostEnvironment env, EntityContext entityContext)
         {
             entityContext.SetTrackingFalse();
-            Application_Start(utilTelemetry, env);
+            Application_Start(env);
             await _next(context);
-        }
-
-        /// <summary>
-        /// Obtiene la configuración de application insights
-        /// </summary>
-        private void LeerConfiguracionApplicationInsights(UtilTelemetry utilTelemetry)
-        {
-            string implementationKey = _configService.GetImplementationKey();
-
-            if (!string.IsNullOrEmpty(implementationKey))
-            {
-                implementationKey = implementationKey.ToLower();
-                TelemetryConfiguration.Active.InstrumentationKey = implementationKey;
-                utilTelemetry.Telemetry.InstrumentationKey = implementationKey;
-            }
         }
     }
 
