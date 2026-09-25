@@ -33,6 +33,7 @@ namespace Gnoss.Web.Documents.Controllers
         private static string mAzureStorageConnectionString;
         private EntityContext mEntityContext;
         private RedisCacheWrapper mRedisCacheWrapper;
+        private IServicesUtilVirtuosoAndReplication mServicesUtilVirtuosoAndReplication;
         private LoggingService mLoggingService;
         private ConfigService mConfigService;
         private GestionArchivos mGestorArchivos = null;
@@ -434,7 +435,7 @@ namespace Gnoss.Web.Documents.Controllers
                     if (DateTime.Now > HORA_COMPROBACION_TRAZA)
                     {
                         HORA_COMPROBACION_TRAZA = DateTime.Now.AddSeconds(15);
-                        TrazasCL trazasCL = new TrazasCL(mEntityContext, mLoggingService, mRedisCacheWrapper, mConfigService, null, mLoggerFactory.CreateLogger<TrazasCL>(), mLoggerFactory);
+                        TrazasCL trazasCL = new TrazasCL(mEntityContext, mLoggingService, mRedisCacheWrapper, mConfigService, mServicesUtilVirtuosoAndReplication, mLoggerFactory.CreateLogger<TrazasCL>(), mLoggerFactory);
                         string tiempoTrazaResultados = trazasCL.ObtenerTrazaEnCache("documents");
 
                         if (!string.IsNullOrEmpty(tiempoTrazaResultados))
