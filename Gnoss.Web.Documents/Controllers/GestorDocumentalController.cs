@@ -192,9 +192,13 @@ namespace Gnoss.Web.Documents.Controllers
         {
             try
             {
-                if (!string.IsNullOrEmpty(Path) && mGestorArchivos.ComprobarExisteDirectorio(Path).Result)
+                if (!string.IsNullOrEmpty(Path))
                 {
-                    mGestorArchivos.EliminarDirectorioEnCascada(Path);
+                    if (GestorArchivos.ComprobarExisteDirectorio(Path).Result)
+                    {
+                        GestorArchivos.EliminarDirectorioEnCascada(Path);
+                    }
+                    // Si el directorio no existe no hay nada que borrar, se considera correcto
                     return Ok(true);
                 }
             }
@@ -213,7 +217,7 @@ namespace Gnoss.Web.Documents.Controllers
             {
                 string directorio = Path.Combine("DocumentosSemanticos", Ontology.ToString().Substring(0, 3), Ontology.ToString());
 
-                mGestorArchivos.EliminarDirectorioEnCascada(directorio);
+                GestorArchivos.EliminarDirectorioEnCascada(directorio);
 
                 return Ok(true);
             }
@@ -287,23 +291,23 @@ namespace Gnoss.Web.Documents.Controllers
             {
                 string rutaFicheroOrigen = PathOrigin;
 
-                if (mGestorArchivos.ComprobarExisteDirectorio(rutaFicheroOrigen).Result)
+                if (GestorArchivos.ComprobarExisteDirectorio(rutaFicheroOrigen).Result)
                 {
-                    string[] ficheros = mGestorArchivos.ObtenerFicherosDeDirectorio(rutaFicheroOrigen).Result;
+                    string[] ficheros = GestorArchivos.ObtenerFicherosDeDirectorio(rutaFicheroOrigen).Result;
 
                     if (ficheros.Length > 0)
                     {
                         string rutaFicheroDestino = PathDestination;
 
-                        bool exists = mGestorArchivos.ComprobarExisteDirectorio(rutaFicheroDestino).Result;
+                        bool exists = GestorArchivos.ComprobarExisteDirectorio(rutaFicheroDestino).Result;
                         if (!exists)
                         {
-                            mGestorArchivos.CrearDirectorioFisico(rutaFicheroDestino);
+                            GestorArchivos.CrearDirectorioFisico(rutaFicheroDestino);
                         }
 
                         foreach (string fichero in ficheros)
                         {
-                            mGestorArchivos.CopiarArchivo(rutaFicheroOrigen, rutaFicheroDestino, fichero, true);
+                            GestorArchivos.CopiarArchivo(rutaFicheroOrigen, rutaFicheroDestino, fichero, true);
                         }
                     }
                 }
@@ -407,7 +411,7 @@ namespace Gnoss.Web.Documents.Controllers
         {
             try
             {
-                long espacio = mGestorArchivos.ObtenerTamanioArchivo(Path, Name + Extension).Result;
+                long espacio = GestorArchivos.ObtenerTamanioArchivo(Path, Name + Extension).Result;
                 double espacioMB = 0;
 
                 if (espacio > 0)
